@@ -42,20 +42,11 @@ public class MainGuiDev extends JFrame   {
     	
 
     public static void initialize() {
-    	actionNames.put(1,"Neutral");
-    	actionNames.put(2,"Push");
-    	actionNames.put(3,"Pull");
-    	actionNames.put(4,"Lift");
-    	actionNames.put(5,"Drop");
-    	actionNames.put(6,"Left");
-    	actionNames.put(7,"Right");
-    	actionNames.put(8,"RotateLeft");
-    	actionNames.put(9,"RotateRight");
-    	actionNames.put(10,"RotateClock");
-    	actionNames.put(11,"RotateC_Clock");
-    	actionNames.put(12,"RotateForward");
-    	actionNames.put(13,"RotateReverse");
-    	actionNames.put(14,"Disappear");
+    	String[] actionStrings = {"Neutral" ,"Push" ,"Pull" ,"Lift" ,"Drop" ,"Left" ,"Right" ,"RotateLeft" ,"RotateRight" 
+        ,"RotateClock"    ,"RotateC_Clock"    ,"RotateForward"    ,"RotateReverse"    ,"Disappear"};
+        for (int i = 1; i < 15; i++) {
+        	actionNames.put(i, actionStrings[i-1]);
+        }
     }	
 
 
