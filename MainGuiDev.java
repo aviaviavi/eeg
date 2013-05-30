@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Hashtable;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -36,6 +37,28 @@ public class MainGuiDev extends JFrame   {
                EmoState.EE_CognitivAction_t.COG_DISAPPEAR.ToInt()
 				};
 	public static Boolean[] cognitivActionsEnabled = new Boolean[cognitivActionList.length];
+
+	public static Hashtable<Integer, String> actionNames = new Hashtable<Integer, String>();
+    	
+
+    public static void initialize() {
+    	actionNames.put(1,"Neutral");
+    	actionNames.put(2,"Push");
+    	actionNames.put(3,"Pull");
+    	actionNames.put(4,"Lift");
+    	actionNames.put(5,"Drop");
+    	actionNames.put(6,"Left");
+    	actionNames.put(7,"Right");
+    	actionNames.put(8,"RotateLeft");
+    	actionNames.put(9,"RotateRight");
+    	actionNames.put(10,"RotateClock");
+    	actionNames.put(11,"RotateC_Clock");
+    	actionNames.put(12,"RotateForward");
+    	actionNames.put(13,"RotateReverse");
+    	actionNames.put(14,"Disappear");
+    }	
+
+
 	
 	/// <summary>
     /// Start traning cognitiv action
@@ -81,6 +104,15 @@ public class MainGuiDev extends JFrame   {
         }
 
     }
+
+
+    /*
+	action needs to take in an int, and prints out the cognitive action as a string, along with its power.
+    */
+    public static printActionAndPower(int action, int power) {
+    	String act_var = actionNames.get(action);
+    	System.out.println(act_var + " " + power); 
+    }
     
     public static void EnableCognitivActionsList()
     {
@@ -97,6 +129,7 @@ public class MainGuiDev extends JFrame   {
         
     }
 	public static void main(String args[]) {
+		inititalize();
 		new MainGui();
 		Pointer eEvent			= Edk.INSTANCE.EE_EmoEngineEventCreate();
     	Pointer eState			= Edk.INSTANCE.EE_EmoStateCreate();
@@ -104,9 +137,7 @@ public class MainGuiDev extends JFrame   {
     	short composerPort		= 3008;
     	int option 				= 2;
     	int state  				= 0;
-    	
-    	
-    	
+	
     	userID = new IntByReference(0);
     	
     	switch (option) {
@@ -185,15 +216,13 @@ public class MainGuiDev extends JFrame   {
 					{
 						Edk.INSTANCE.EE_EmoEngineEventGetEmoState(eEvent, eState);
 						
-						//{
 							int action = EmoState.INSTANCE.ES_CognitivGetCurrentAction(eState);
 							double power = EmoState.INSTANCE.ES_CognitivGetCurrentActionPower(eState);
-							if(power!=0)
-							{
-								System.out.println("Action:" + action);
-								System.out.println("Power:" + power);
+							if(power!=0){
+								printActionAndPower(action, power);
 							}
-						//}
+
+
 					}
 				}
 				else if (state != EdkErrorCode.EDK_NO_EVENT.ToInt()) {
