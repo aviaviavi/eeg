@@ -1,27 +1,9 @@
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Hashtable;
-import java.awt.Robot;
-
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.xml.soap.MessageFactory;
-
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 
-//import statements
-//Check if window closes automatically. Otherwise add suitable code
-public class MainGuiDev extends JFrame   {
-	public static JButton trainBtt,saveBtt,loadBtt;
-	public static JComboBox comboBox;
+public class EegRCControl  {
+
 	public static int[] cognitivActionList ={EmoState.EE_CognitivAction_t.COG_NEUTRAL.ToInt(),
 			   EmoState.EE_CognitivAction_t.COG_PUSH.ToInt(),
 			   EmoState.EE_CognitivAction_t.COG_PULL.ToInt(),
@@ -111,8 +93,9 @@ public class MainGuiDev extends JFrame   {
         Edk.INSTANCE.EE_CognitivSetActiveActions(0, cognitivActions);
         
     }
-	public static void main(String args[]) {
-		inititalize();
+	public static void main(String args[]) throws InterruptedException {
+		System.out.println(EmoState.EE_CognitivAction_t.COG_NEUTRAL.ToInt());
+		initialize();
 		Pointer eEvent			= Edk.INSTANCE.EE_EmoEngineEventCreate();
     	Pointer eState			= Edk.INSTANCE.EE_EmoStateCreate();
     	IntByReference userID 	= null;
@@ -148,39 +131,41 @@ public class MainGuiDev extends JFrame   {
 			return;
     	}
     	
-		while (true) 
-			{
-				state = Edk.INSTANCE.EE_EngineGetNextEvent(eEvent);
-				
-				// New event needs to be handled
-				if (state == EdkErrorCode.EDK_OK.ToInt()) {
-	
-					int eventType = Edk.INSTANCE.EE_EmoEngineEventGetType(eEvent);
-					Edk.INSTANCE.EE_EmoEngineEventGetUserId(eEvent, userID);
-					
-					if(eventType == Edk.EE_Event_t.EE_EmoStateUpdated.ToInt()) {
-						Edk.INSTANCE.EE_EmoEngineEventGetEmoState(eEvent, eState);
-						
-							int action = EmoState.INSTANCE.ES_CognitivGetCurrentAction(eState);
-							double power = EmoState.INSTANCE.ES_CognitivGetCurrentActionPower(eState);
-							if(power!=0){
-							
-								System.out.println("action: " + action + "\npower: "+ power);
-								keyboard.takeInput(action, power);
+		while (true) {
+			state = Edk.INSTANCE.EE_EngineGetNextEvent(eEvent);
+			
+			// New event needs to be handled
+			if (state == EdkErrorCode.EDK_OK.ToInt()) {
 
-							}
-					}
-				}
-				else if (state != EdkErrorCode.EDK_NO_EVENT.ToInt()) {
-					System.out.println("Internal error in Emotiv Engine!");
-					break;
+				int eventType = Edk.INSTANCE.EE_EmoEngineEventGetType(eEvent);
+				Edk.INSTANCE.EE_EmoEngineEventGetUserId(eEvent, userID);
+				
+				if(eventType == Edk.EE_Event_t.EE_EmoStateUpdated.ToInt()) {
+					Edk.INSTANCE.EE_EmoEngineEventGetEmoState(eEvent, eState);
+					
+						int action = EmoState.INSTANCE.ES_CognitivGetCurrentAction(eState);
+						double power = EmoState.INSTANCE.ES_CognitivGetCurrentActionPower(eState);
+						if(power!=0){
+						
+							System.out.println("action: " + action + "\npower: "+ power);
+
+							keyboard.takeInput(action, power);
+							//Thread.sleep(2000);
+
+						}
 				}
 			}
-	    	
-	    	Edk.INSTANCE.EE_EngineDisconnect();
-	    	System.out.println("Disconnected!");
-	    }
+			else if (state != EdkErrorCode.EDK_NO_EVENT.ToInt()) {
+				System.out.println("Internal error in Emotiv Engine!");
+				break;
+			}
+		}
+    	
+    	Edk.INSTANCE.EE_EngineDisconnect();
+    	System.out.println("Disconnected!");
+    }
 	
+}
 	// MainGuiDev() {
 	// 	cognitivActionsEnabled[0] = true;
  //        for (int i = 1; i < cognitivActionList.length; i++)
@@ -267,4 +252,3 @@ public class MainGuiDev extends JFrame   {
 	// 	setVisible(true);
 	// }
 	
-}
