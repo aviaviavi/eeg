@@ -1,37 +1,42 @@
 import com.sun.jna.ptr.IntByReference;
-import java.util.list;
 import java.util.Hashtable;
+import java.lang.StringBuilder;
+import java.util.Date;
+import com.sun.jna.Pointer;
+import com.sun.jna.ptr.IntByReference;
 
 public class MindRecord {
 
-	private Hashtable<String, List> allRecords;
+	// private Hashtable<String, List> allRecords;
 
-	public MindRecord() {
-		allRecords = new HashTable<String, List>();
-	}
-
-	//
-	public boolean controlPanelConnect(){
-
-	}
+	// public MindRecord() {
+	// 	allRecords = new HashTable<String, List>();
+	// }
 
 	//
-	public void recordStart() {
+	// public boolean controlPanelConnect(){
+
+	// }
+
+	//
+	public static void recordStart() {
 		Pointer eEvent			= Edk.INSTANCE.EE_EmoEngineEventCreate();
     	Pointer eState			= Edk.INSTANCE.EE_EmoStateCreate();
     	IntByReference userID 	= null;
     	//control panel by default, we wont connect directly
     	short composerPort		= 3008;
     	int state  				= 0;
+    	String delimeter		= " ";
+    	StringBuilder timeStamp;
 
     	if (Edk.INSTANCE.EE_EngineRemoteConnect("127.0.0.1", composerPort, "Emotiv Systems-5") != EdkErrorCode.EDK_OK.ToInt()) {
 				System.out.println("Cannot connect to EmoComposer on [127.0.0.1]");
 				return;
-			}
+		}
 		System.out.println("Connected to ControlPanel on [127.0.0.1]");
 
-				while (true) 
-		{
+		while (true) {
+			timeStamp = new StringBuilder();
 			state = Edk.INSTANCE.EE_EngineGetNextEvent(eEvent);
 
 			// New event needs to be handled
@@ -44,8 +49,6 @@ public class MindRecord {
 				if (eventType == Edk.EE_Event_t.EE_EmoStateUpdated.ToInt()) {
 
 					Edk.INSTANCE.EE_EmoEngineEventGetEmoState(eEvent, eState);
-					float timestamp = EmoState.INSTANCE.ES_GetTimeFromStart(eState);
-					System.out.println(timestamp + " : New EmoState from user " + userID.getValue());
 					
 					System.out.print("WirelessSignalStatus: ");
 					System.out.println(EmoState.INSTANCE.ES_GetWirelessSignalStatus(eState));
@@ -61,20 +64,18 @@ public class MindRecord {
 					if (EmoState.INSTANCE.ES_ExpressivIsLookingRight(eState) == 1)
 						System.out.println("LookingRight");
 					
-					System.out.print("ExcitementShortTerm: ");
-					System.out.println(EmoState.INSTANCE.ES_AffectivGetExcitementShortTermScore(eState));
-					System.out.print("ExcitementLongTerm: ");
-					System.out.println(EmoState.INSTANCE.ES_AffectivGetExcitementLongTermScore(eState));
-					System.out.print("EngagementBoredom: ");
-					System.out.println(EmoState.INSTANCE.ES_AffectivGetEngagementBoredomScore(eState));
-					
-					System.out.print("CognitivGetCurrentAction: ");
-					System.out.println(EmoState.INSTANCE.ES_CognitivGetCurrentAction(eState));
-					System.out.print("CurrentActionPower: ");
-					System.out.println(EmoState.INSTANCE.ES_CognitivGetCurrentActionPower(eState));
+					timeStamp.append(EmoState.INSTANCE.ES_AffectivGetExcitementShortTermScore(eState) + delimeter);
+					timeStamp.append(EmoState.INSTANCE.ES_AffectivGetExcitementLongTermScore(eState) + delimeter);
+					timeStamp.append(EmoState.INSTANCE.ES_AffectivGetEngagementBoredomScore(eState) + delimeter);			
+					timeStamp.append(EmoState.INSTANCE.ES_CognitivGetCurrentAction(eState) + delimeter);
+					timeStamp.append(EmoState.INSTANCE.ES_CognitivGetCurrentActionPower(eState) + delimeter);
+
+					timeStamp.append(new Date().toString());
+
+					System.out.println(timeStamp);
+
 				}
-			}
-			else if (state != EdkErrorCode.EDK_NO_EVENT.ToInt()) {
+			} else {
 				System.out.println("Internal error in Emotiv Engine!");
 				break;
 			}
@@ -83,12 +84,14 @@ public class MindRecord {
     	Edk.INSTANCE.EE_EngineDisconnect();
     	System.out.println("Disconnected!");
     }
-	}
 
 	//
 	public void recordStop() {
 
 	}
 
-	
+	public static void main(String[] args) {
+		recordStart();
+	}
+
 }
