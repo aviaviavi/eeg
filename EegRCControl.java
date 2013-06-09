@@ -94,7 +94,6 @@ public class EegRCControl  {
         
     }
 	public static void main(String args[]) throws InterruptedException {
-		System.out.println(EmoState.EE_CognitivAction_t.COG_NEUTRAL.ToInt());
 		initialize();
 		Pointer eEvent			= Edk.INSTANCE.EE_EmoEngineEventCreate();
     	Pointer eState			= Edk.INSTANCE.EE_EmoStateCreate();
