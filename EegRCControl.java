@@ -141,17 +141,24 @@ public class EegRCControl  {
 				
 				if(eventType == Edk.EE_Event_t.EE_EmoStateUpdated.ToInt()) {
 					Edk.INSTANCE.EE_EmoEngineEventGetEmoState(eEvent, eState);
-					
-						int action = EmoState.INSTANCE.ES_CognitivGetCurrentAction(eState);
-						double power = EmoState.INSTANCE.ES_CognitivGetCurrentActionPower(eState);
-						if(power!=0){
 						
-							System.out.println("action: " + action + "\npower: "+ power);
-
-							keyboard.takeInput(action, power);
-							//Thread.sleep(2000);
-
+					//get the current action
+					int action = EmoState.INSTANCE.ES_CognitivGetCurrentAction(eState);
+					double power = EmoState.INSTANCE.ES_CognitivGetCurrentActionPower(eState);
+					if(power!=0){
+						
+						System.out.println("action: " + action + "\npower: "+ power);
+						keyboard.takeInput(action, power);
+						//handle if its forward. continue going forward unless another action or a left wink is detected
+						 while (action == EmoState.EE_CognitivAction_t.COG_PUSH.ToInt() && EmoState.INSTANCE.ES_ExpressivIsLeftWink(eState) != 1) {
+							int eventType = Edk.INSTANCE.EE_EmoEngineEventGetType(eEvent);
+							Edk.INSTANCE.EE_EmoEngineEventGetEmoState(eEvent, eState);
+							int action = EmoState.INSTANCE.ES_CognitivGetCurrentAction(eState);
+							double power = EmoState.INSTANCE.ES_CognitivGetCurrentActionPower(eState);
+							keyboard.takeInput(EmoState.EE_CognitivAction_t.COG_PUSH.ToInt(), .5);
 						}
+						//Thread.sleep(2000);
+					}
 				}
 			}
 			else if (state != EdkErrorCode.EDK_NO_EVENT.ToInt()) {
@@ -165,89 +172,5 @@ public class EegRCControl  {
     }
 	
 }
-	// MainGuiDev() {
-	// 	cognitivActionsEnabled[0] = true;
- //        for (int i = 1; i < cognitivActionList.length; i++)
- //        {
- //            cognitivActionsEnabled[i] = false;
- //        }
-	// 	this.setSize(600, 300);
-	// 	Container content = getContentPane();
-	//     content.setBackground(Color.white);
-	//     content.setLayout(new FlowLayout());
-	    
-	//     String [] options = {"Neutral","Push","Lift"};
-	//     comboBox = new JComboBox(options);
-	 
-	//     add(comboBox);
-	// 	trainBtt = new JButton("Train");
-	// 	trainBtt.addActionListener(new ActionListener() {
-			
-	// 		@Override
-	// 		public void actionPerformed(ActionEvent e) {
-		
-	// 			int index = comboBox.getSelectedIndex();
-	// 			if(index == 0)
-	// 			{
-	// 				Edk.INSTANCE.EE_CognitivSetTrainingAction(0,EmoState.EE_CognitivAction_t.COG_NEUTRAL.ToInt());
-	// 				Edk.INSTANCE.EE_CognitivSetTrainingControl(0, Edk.EE_CognitivTrainingControl_t.COG_START.getType());
-	// 			}
-	// 			if(index ==1)
-	// 			{
-	// 				try
-	// 				{
-	// 					EnableCognitivAction(EmoState.EE_CognitivAction_t.COG_PUSH, true);
-	// 					EnableCognitivActionsList();
-	// 					StartTrainingCognitiv(EmoState.EE_CognitivAction_t.COG_PUSH);
-	// 				}
-	// 				catch(Exception ex){
-	// 					ex.printStackTrace();
-	// 				}
-	// 			}
-	// 			if(index == 2)
-	// 			{
-	// 				try
-	// 				{
-	// 					EnableCognitivAction(EmoState.EE_CognitivAction_t.COG_LIFT, true);
-	// 					EnableCognitivActionsList();
-	// 					StartTrainingCognitiv(EmoState.EE_CognitivAction_t.COG_LIFT);
-	// 				}
-	// 				catch(Exception ex){
-	// 					ex.printStackTrace();
-	// 				}
-	// 			}
-	// 		}
-	// 	});
-		
-	// 	add(trainBtt);
-		
-	// 	/// Save Profile handle
-	// 	saveBtt = new JButton("Save Profile");
-	// 	saveBtt.addActionListener(new ActionListener() {
-			
-	// 		@Override
-	// 		public void actionPerformed(ActionEvent e) {
-				
-	// 			EmoProfileManagement.SaveCurrentProfile();
-	// 			EmoProfileManagement.SaveProfilesToFile();
-	// 		}
-	// 	});
-	// 	add(saveBtt);
-		
-	// 	/// Load Profile handle
-	// 	loadBtt = new JButton("Load Profile");
-	// 	loadBtt.addActionListener(new ActionListener() {
-			
-	// 		@Override
-	// 		public void actionPerformed(ActionEvent e) {
-	// 			EmoProfileManagement.LoadProfilesFromFile();
-	// 			EmoProfileManagement.SetUserProfile("1");
-	// 			String actionList = EmoProfileManagement.CheckCurrentProfile();
-	// 			long cognitivActions = Long.valueOf(actionList);
-	// 			Edk.INSTANCE.EE_CognitivSetActiveActions(0, cognitivActions);
-	// 		}
-	// 	});
-	// 	add(loadBtt);
-	// 	setVisible(true);
-	// }
+
 	
